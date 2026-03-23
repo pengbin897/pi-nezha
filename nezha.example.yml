@@ -1,0 +1,55 @@
+# Nezha 配置文件示例 (YAML)
+# 使用动态 Gateway 加载机制
+
+# Gateway 配置数组
+# 每个 Gateway 需要指定三个字段：
+# - type: Gateway 类型标识（用于日志显示）
+# - handler: Handler 模块路径（相对于 gateway 目录）
+# - config: Gateway 特定配置对象
+
+gateway:
+  # HTTP Gateway - 提供 REST API 接口
+  - type: http
+    handler: http/handler.js
+    config:
+      # 监听端口（默认 3000）
+      port: 3000
+      # 监听地址（默认 127.0.0.1）
+      host: 127.0.0.1
+
+  # 钉钉 Gateway - 连接钉钉机器人
+  - type: dingtalk
+    handler: channels/dingtalk/handler.js
+    config:
+      # 应用 Client ID（必需）
+      clientId: your-dingtalk-client-id
+      # 应用 Client Secret（必需）
+      clientSecret: your-dingtalk-client-secret
+      # 是否开启调试日志（默认 false）
+      debug: false
+      # 是否启用心跳保活（默认 true）
+      keepAlive: true
+      # 断线是否自动重连（默认 true）
+      autoReconnect: true
+
+  # 飞书 Gateway - 连接飞书机器人（待实现）
+  # - type: feishu
+  #   handler: channels/feishu/handler.js
+  #   config:
+  #     appId: your-feishu-app-id
+  #     appSecret: your-feishu-app-secret
+
+  # 企业微信 Gateway - 连接企业微信（待实现）
+  # - type: wechat
+  #   handler: channels/wechat/handler.js
+  #   config:
+  #     corpId: your-corp-id
+  #     corpSecret: your-corp-secret
+
+  # 自定义 Gateway 示例
+  # 只需创建符合 GatewayHandler 接口的模块并导出 create 函数即可
+  # - type: custom
+  #   handler: custom/my-gateway/handler.js
+  #   config:
+  #     # 你的自定义配置
+  #     key: value

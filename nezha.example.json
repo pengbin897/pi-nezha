@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "description": "Nezha 配置文件示例 - 使用动态 Gateway 加载机制",
+  "gateway": [
+    {
+      "type": "http",
+      "handler": "http/handler.js",
+      "config": {
+        "port": 3000,
+        "host": "127.0.0.1"
+      }
+    },
+    {
+      "type": "dingtalk",
+      "handler": "channels/dingtalk/handler.js",
+      "config": {
+        "clientId": "your-dingtalk-client-id",
+        "clientSecret": "your-dingtalk-client-secret",
+        "debug": false,
+        "keepAlive": true,
+        "autoReconnect": true
+      }
+    }
+  ]
+}
