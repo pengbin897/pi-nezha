@@ -2,8 +2,8 @@
 import { join } from "node:path";
 import { homedir } from "os";
 import chalk from "chalk";
+import cron from "node-cron";
 import {
-	getAgentDir,
 	createAgentSession,
 	InteractiveMode,
 	SettingsManager,
@@ -14,7 +14,7 @@ import {
 	type CreateAgentSessionOptions,
 	DefaultResourceLoader,
 } from "@mariozechner/pi-coding-agent";
-import { loadNezhaConfig } from "./config.js";
+import { loadNezhaConfig, parseArgs } from "./config.js";
 import { GatewayManager } from "./gateway/manager.js";
 import { createGatewayHandlers } from "./gateway/factory.js";
 
@@ -29,8 +29,14 @@ function reportSettingsErrors(settingsManager: SettingsManager, context: string)
 	}
 }
 
-export async function main(args: string[]) {
+async function startCronTasks(): Promise<void> {
+	const cronTask = cron.schedule('0 0 * * *', async () => {
+		console.log('定时任务执行');
+	});
+	await cronTask.start();
+}
 
+export async function main(args: string[]) {
 	/**
 	 * 关键逻辑：从配置文件加载 Nezha 配置
 	 * 配置文件位于 ${agentDir}/nezha.json 或 nezha.yml
@@ -77,11 +83,23 @@ export async function main(args: string[]) {
 // 		...config.agent,
 // 	};
 
-	// 先使用pi的设置框架
-	const cwd = join(homedir(), "nezha-workspace");
-	// const agentDir = getAgentDir();
-	const agentDir = join(cwd, "agent");
-	// console.info(`init cwd is ${cwd}, agent dir is ${agentDir}`);
+	const parsedArgs = parseArgs(args);
+	// 生产运行默认工作目录为 ~/nezha-workspace， agent目录为 ~/nezha-workspace/agent
+	let cwd: string = join(homedir(), "nezha-workspace");
+	let agentDir: string = join(cwd, "agent");
+
+	if (parsedArgs.dev) {
+		console.info(chalk.cyan("Running in development mode"));
+		cwd = process.cwd();
+		agentDir = cwd;
+	} else {
+		console.info(chalk.cyan("Running in production mode"));
+		if (parsedArgs.workspace) {
+			cwd = parsedArgs.workspace;
+		}
+	}
+	const nezhaConfig = loadNezhaConfig(cwd);
+	agentDir = nezhaConfig?.agent?.agentDir ?? join(cwd, "agent");
 	
 	const settingsManager = SettingsManager.create(cwd, agentDir);
 	reportSettingsErrors(settingsManager, "startup");
@@ -145,14 +163,13 @@ export async function main(args: string[]) {
 	 * 3. 使用 GatewayManager 统一管理启动和停止
 	 * 4. 若有 Gateway 启用，则进入常驻状态；否则进入交互模式
 	 */
-	const nezhaConfig = loadNezhaConfig(cwd);
 	if (!nezhaConfig) {
-		console.error(chalk.red(`No configuration file found in ${agentDir}`));
+		console.error(chalk.red(`No configuration file found in ${cwd}`));
 		console.error(chalk.yellow(`\nCreate a nezha.json or nezha.yml file. See nezha.example.json for reference.`));
 		process.exit(1);
 	}
 	if (!nezhaConfig.gateway || nezhaConfig.gateway.length === 0) {
-		console.info(chalk.cyan(`No gateways configured in ${agentDir}/nezha.json`));
+		console.info(chalk.cyan(`No gateways configured in ${cwd}/nezha.json(nezha.yml)`));
 		console.info(chalk.cyan(`\nAdd at least one gateway to the "gateways" array.`));
 	} else {
 		console.info(chalk.cyan(`load nezha config: ${nezhaConfig}`));
@@ -211,6 +228,9 @@ export async function main(args: string[]) {
 			}
 		}
 	}
+	// 启动定时任务
+	await startCronTasks();
+
 	// 同时启动交互模式
 	const mode = new InteractiveMode(session);
 	await mode.run();
@@ -220,4 +240,4 @@ export async function main(args: string[]) {
 import dotenv from 'dotenv';
 dotenv.config();
 
-main(process.argv);
+main(process.argv.slice(2));

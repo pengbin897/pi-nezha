@@ -62,11 +62,18 @@ export interface GatewayConfigItem {
  */
 export type GatewayConfig = GatewayConfigItem[];
 
+export interface AgentConfig {
+	agentDir: string;
+	models: ModelConfig[];
+	sysPrompt: string;
+	appendSysPrompt: string;
+}
+
 /**
  * Nezha 完整配置
  */
 export interface NezhaConfig {
-	// agent: 
+	agent?: AgentConfig;
 	/** Gateway 配置数组（加载后已由对象形式规范为数组） */
 	gateway?: GatewayConfig;
 }
@@ -84,6 +91,34 @@ const GATEWAY_OBJECT_DEFAULT_HANDLERS: Record<string, string> = {
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
 	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export interface Args {
+	dev?: boolean;
+	help?: boolean;
+	workspace?: string;
+	agent?: string;
+	model?: string;
+}
+
+export function parseArgs(args: string[]): Args {
+	const result: Args = {};
+	for (let i = 0; i < args.length; i++) {
+		const arg = args[i];
+		if (!arg.startsWith("-")) {
+			// 错误的参数
+			throw new Error(`错误的参数: ${arg}`);
+		} else if (arg === "--dev") {
+			result.dev = true;
+		} else if (arg === "--help") {
+			result.help = true;
+		} else if (arg === "--workspace" && i + 1 < args.length) {
+			result.workspace = args[++i];
+		} else if (arg === "--agent" && i + 1 < args.length) {
+			result.agent = args[++i];
+		}
+	}
+	return result;
 }
 
 /**

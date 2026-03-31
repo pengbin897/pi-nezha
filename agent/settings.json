@@ -1,0 +1,5 @@
+{
+  "lastChangelogVersion": "0.60.0",
+  "defaultProvider": "dashscope",
+  "defaultModel": "qwen3-max-2026-01-23"
+}

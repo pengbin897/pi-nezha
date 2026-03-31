@@ -1,0 +1,64 @@
+# Nezha 配置文件示例 (YAML)
+
+# Agent Session 配置
+agent:
+  agentDir: ./agent
+  
+  # 模型配置（必需）
+  models:
+    # 模型提供商：anthropic, openai, gemini 等
+    providers:
+      dashscope: 
+        baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+        api: openai-completions
+        apiKey: ${DASHSCOPE_API_KEY}
+        models:
+          - id: qwen3-max-2026-01-23
+          - id: MiniMax-M2.5
+          - id: kimi-k2.5
+      aigcbest:
+        baseUrl: https://35.aigcbest.top/v1
+        api: openai-completions
+        apiKey: ${AIGCBEST_API_KEY}
+        models:
+          - id: gpt-5-nano
+  
+# Gateway 配置（可选）
+gateway:
+  # HTTP Gateway
+  http:
+    enabled: false
+    # 监听端口（默认 3000）
+    port: 3000
+    # 监听地址（默认 127.0.0.1）
+    host: 127.0.0.1
+  
+  # 钉钉 Gateway
+  dingtalk:
+    enabled: false
+    # Client ID（可选，优先使用环境变量 PI_DINGTALK_CLIENT_ID 或 DINGTALK_CLIENT_ID）
+    clientId: ${DINGTALK_CLIENT_ID}
+    # Client Secret（可选，优先使用环境变量 PI_DINGTALK_CLIENT_SECRET 或 DINGTALK_CLIENT_SECRET）
+    clientSecret: ${DINGTALK_CLIENT_SECRET}
+    # 是否开启调试日志（默认 false）
+    debug: true
+    # 是否启用心跳保活（默认 true）
+    keepAlive: true
+    # 断线是否自动重连（默认 true）
+    autoReconnect: true
+  
+  # 飞书 Gateway（待实现）
+  feishu:
+    enabled: false
+    # appId: xxx
+    # appSecret: xxx
+  
+  # 企业微信 Gateway（待实现）
+  wechat:
+    enabled: false
+    # corpId: xxx
+    # corpSecret: xxx
+
+skills:
+  path: ./skills
+  

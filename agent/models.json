@@ -1,0 +1,22 @@
+{
+  "providers": {
+    "dashscope": {
+      "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-90cb7ca9e5de40dd813756824f0d5fab",
+      "models": [
+        {"id": "qwen3-max-2026-01-23"},
+        {"id": "MiniMax-M2.5"},
+        {"id": "kimi-k2.5"}
+      ]
+    },
+    "35.aigcbest": {
+      "baseUrl": "https://35.aigcbest.top/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-I6VjYVBDZqbUbx3w2231B0A2Aa5e4cCc95F9B35334A006Ec",
+      "models": [
+        {"id": "gpt-5-nano"}
+      ]
+    }
+  }  
+}
